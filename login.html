@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="expires" content="-1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Internet hotspot - Log in</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            /* Galaxy Background */
+            background: radial-gradient(circle at top, #2d0057, #080014 70%, #000010);
+            overflow: hidden;
+            color: white;
+        }
+
+        /* Moving Stars */
+        .stars {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: url("https://i.ibb.co/7JfqXxB/stars.png");
+            animation: starsMove 30s linear infinite;
+            opacity: 0.35;
+            z-index: 0;
+        }
+
+        @keyframes starsMove {
+            from { transform: translateY(0); }
+            to { transform: translateY(-900px); }
+        }
+
+        /* Login Container */
+        .wrap {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 40px;
+            border-radius: 18px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 25px rgba(130, 80, 255, 0.4);
+            z-index: 2;
+            width: 320px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 18px;
+            text-shadow: 0 0 10px #b28dff;
+        }
+
+        /* Input Boxes */
+        input[type="text"],
+        input[type="password"] {
+            background: rgba(255, 255, 255, 0.18);
+            border: none;
+            color: white;
+            padding: 12px;
+            width: 100%;
+            border-radius: 10px;
+            margin-top: 10px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        /* Login Button */
+        input[type="submit"] {
+            background: linear-gradient(45deg, #784dff, #4dc6ff);
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 10px;
+            margin-top: 18px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(120, 80, 255, 0.7);
+            transition: 0.25s;
+        }
+
+        input[type="submit"]:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(150, 100, 255, 0.9);
+        }
+
+        .info {
+            text-align: center;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="stars"></div>
+
+    <!-- CHAP AUTH (default Mikrotik) -->
+    $(if chap-id)
+    <form name="sendin" action="$(link-login-only)" method="post" style="display:none">
+        <input type="hidden" name="username" />
+        <input type="hidden" name="password" />
+        <input type="hidden" name="dst" value="$(link-orig)" />
+        <input type="hidden" name="popup" value="true" />
+    </form>
+
+    <script src="/md5.js"></script>
+    <script>
+        function doLogin() {
+            document.sendin.username.value = document.login.username.value;
+            document.sendin.password.value = hexMD5('$(chap-id)' + document.login.password.value + '$(chap-challenge)');
+            document.sendin.submit();
+            return false;
+        }
+    </script>
+    $(endif)
+
+    <div class="main">
+        <div class="wrap">
+
+            <div class="welcome">Selamat Datang di SMKN 53 Jakarta</div>
+
+            <form name="login" action="$(link-login-only)" method="post" $(if chap-id) onSubmit="return doLogin()" $(endif)>
+                <input type="hidden" name="dst" value="$(link-orig)" />
+                <input type="hidden" name="popup" value="true" />
+
+                <p class="info $(if error)alert$(endif)">
+                    $(if error == "")Silakan login untuk mengakses internet.$(endif)
+                    $(if error)$(error)$(endif)
+                </p>
+
+                <input name="username" type="text" value="$(username)" placeholder="Username" />
+
+                <input name="password" type="password" placeholder="Password" />
+
+                <input type="submit" value="Connect" />
+            </form>
+
+            <p class="info">Powered by MikroTik RouterOS</p>
+
+        </div>
+    </div>
+
+</body>
+
+</html>
