@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galisyah | Network Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <canvas id="network-canvas"></canvas>
+    <div class="container">
+        <aside class="sidebar" id="sidebar" data-tilt data-tilt-max="2" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.1">
+            <div class="logo">
+                <span class="logo-dot"></span>
+                <h2>GALISYAH</h2>
+            </div>
+            <nav>
+                <ul>
+                    <li class="active"><a href="#"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                    <li><a href="#"><i class="fas fa-server"></i> Devices</a></li>
+                    <li><a href="#"><i class="fas fa-shield-alt"></i> Security</a></li>
+                    <li><a href="#"><i class="fas fa-project-diagram"></i> Topology</a></li>
+                    <li><a href="https://galisyah.my.id" target="_blank"><i class="fas fa-user"></i> Portfolio</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <div class="toggle-btn" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <div class="user-profile">
+                    <span>Network Engineer</span>
+                    <img src="images/logo.png" alt="Galisyah">
+                </div>
+            </header>
+
+            <section class="stats-grid">
+                <div class="card" data-tilt data-tilt-max="10" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.2">
+                    <div class="card-info">
+                        <p>Total Uptime</p>
+                        <h3>99.9%</h3>
+                    </div>
+                    <i class="fas fa-clock icon-green"></i>
+                </div>
+                <div class="card" data-tilt data-tilt-max="10" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.2">
+                    <div class="card-info">
+                        <p>Active Nodes</p>
+                        <h3>142</h3>
+                    </div>
+                    <i class="fas fa-network-wired icon-green"></i>
+                </div>
+                <div class="card" data-tilt data-tilt-max="10" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.2">
+                    <div class="card-info">
+                        <p>Bandwidth</p>
+                        <h3>1.2 Gbps</h3>
+                    </div>
+                    <i class="fas fa-bolt icon-green"></i>
+                </div>
+            </section>
+
+            <section class="table-container" data-tilt data-tilt-max="2" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.1">
+                <h3>Live Network Status</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Device Name</th>
+                            <th>IP Address</th>
+                            <th>Status</th>
+                            <th>Latency</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Core-Router-01</td>
+                            <td>192.168.1.1</td>
+                            <td><span class="status online">Online</span></td>
+                            <td>2ms</td>
+                        </tr>
+                        <tr>
+                            <td>Switch-Dist-A</td>
+                            <td>192.168.1.10</td>
+                            <td><span class="status online">Online</span></td>
+                            <td>5ms</td>
+                        </tr>
+                        <tr>
+                            <td>Firewall-Main</td>
+                            <td>10.0.0.1</td>
+                            <td><span class="status offline">Offline</span></td>
+                            <td>--</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+    
+    <!-- Scripts for 3D and Interactions -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
