@@ -1,6 +1,7 @@
-import React from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Home, Users, UtensilsCrossed, FileText, PlusCircle } from 'lucide-react';
+import React, { useContext } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Home, Users, UtensilsCrossed, FileText, PlusCircle, LogOut } from 'lucide-react';
+import { WarungContext } from '../context/WarungContext';
 
 const navItems = [
   { path: '/', label: 'Dasbor', icon: <Home size={20} /> },
@@ -12,7 +13,14 @@ const navItems = [
 
 export const Layout = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout, session } = useContext(WarungContext);
   const currentNav = navItems.find(nav => nav.path === location.pathname) || navItems[0];
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/auth');
+  };
 
   return (
     <div className="app-container">
@@ -33,6 +41,10 @@ export const Layout = () => {
               {item.label}
             </NavLink>
           ))}
+          <button onClick={handleLogout} className="nav-item" style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left', marginTop: 'auto', borderTop: '1px solid var(--color-border)', color: 'var(--color-sambal)' }}>
+            <LogOut size={20} />
+            Keluar
+          </button>
         </nav>
       </aside>
 
@@ -60,6 +72,10 @@ export const Layout = () => {
             <span>{item.label}</span>
           </NavLink>
         ))}
+        <button onClick={handleLogout} className="bottom-nav-item" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-sambal)' }}>
+          <LogOut size={20} />
+          <span>Keluar</span>
+        </button>
       </nav>
     </div>
   );

@@ -1,71 +1,138 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 
 export const WarungContext = createContext();
 
-const defaultMenus = [
-  { id: '1', name: 'Nasi Goreng Spesial', price: 15000 },
-  { id: '2', name: 'Ayam Geprek Sambal Bawang', price: 12000 },
-  { id: '3', name: 'Indomie Goreng Telur', price: 8000 },
-  { id: '4', name: 'Es Teh Manis', price: 3000 },
-  { id: '5', name: 'Kopi Hitam', price: 4000 }
-];
-
 export const WarungProvider = ({ children }) => {
-  const [menus, setMenus] = useState(() => {
-    const localData = localStorage.getItem('warung_menus');
-    return localData ? JSON.parse(localData) : defaultMenus;
-  });
-
-  const [customers, setCustomers] = useState(() => {
-    const localData = localStorage.getItem('warung_customers');
-    return localData ? JSON.parse(localData) : [];
-  });
-
-  const [transactions, setTransactions] = useState(() => {
-    const localData = localStorage.getItem('warung_transactions');
-    return localData ? JSON.parse(localData) : [];
-  });
+  const [session, setSession] = useState(null);
+  const [menus, setMenus] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem('warung_menus', JSON.stringify(menus));
-  }, [menus]);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem('warung_customers', JSON.stringify(customers));
-  }, [customers]);
+    if (session?.user) {
+      fetchData(session.user.id);
+    } else {
+      setMenus([]);
+      setCustomers([]);
+      setTransactions([]);
+      setLoading(false);
+    }
+  }, [session]);
 
-  useEffect(() => {
-    localStorage.setItem('warung_transactions', JSON.stringify(transactions));
-  }, [transactions]);
+  const fetchData = async (userId) => {
+    setLoading(true);
+    try {
+      const [menuRes, customerRes, transRes] = await Promise.all([
+        supabase.from('menus').select('*').order('created_at', { ascending: true }),
+        supabase.from('customers').select('*').order('name', { ascending: true }),
+        supabase.from('transactions').select('*').order('date', { ascending: false })
+      ]);
+
+      if (menuRes.data) setMenus(menuRes.data);
+      if (customerRes.data) setCustomers(customerRes.data);
+      if (transRes.data) setTransactions(transRes.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+  };
 
   // Menu Actions
-  const addMenu = (menu) => setMenus([...menus, { ...menu, id: Date.now().toString() }]);
-  const updateMenu = (id, updated) => setMenus(menus.map(m => m.id === id ? { ...m, ...updated } : m));
-  const deleteMenu = (id) => setMenus(menus.filter(m => m.id !== id));
+  const addMenu = async (menu) => {
+    if (!session?.user) return;
+    const { data, error } = await supabase.from('menus').insert([{ ...menu, user_id: session.user.id }]).select();
+    if (data) setMenus([...menus, data[0]]);
+    if (error) console.error(error);
+  };
+
+  const updateMenu = async (id, updated) => {
+    const { data, error } = await supabase.from('menus').update(updated).eq('id', id).select();
+    if (data) setMenus(menus.map(m => m.id === id ? data[0] : m));
+    if (error) console.error(error);
+  };
+
+  const deleteMenu = async (id) => {
+    await supabase.from('menus').delete().eq('id', id);
+    setMenus(menus.filter(m => m.id !== id));
+  };
 
   // Customer Actions
-  const addCustomer = (customer) => setCustomers([...customers, { ...customer, id: Date.now().toString() }]);
-  const updateCustomer = (id, updated) => setCustomers(customers.map(c => c.id === id ? { ...c, ...updated } : c));
-  const deleteCustomer = (id) => setCustomers(customers.filter(c => c.id !== id));
+  const addCustomer = async (customer) => {
+    if (!session?.user) return;
+    const { data, error } = await supabase.from('customers').insert([{ ...customer, user_id: session.user.id }]).select();
+    if (data) setCustomers([...customers, data[0]]);
+    if (error) console.error(error);
+  };
+
+  const updateCustomer = async (id, updated) => {
+    const { data, error } = await supabase.from('customers').update(updated).eq('id', id).select();
+    if (data) setCustomers(customers.map(c => c.id === id ? data[0] : c));
+    if (error) console.error(error);
+  };
+
+  const deleteCustomer = async (id) => {
+    await supabase.from('customers').delete().eq('id', id);
+    setCustomers(customers.filter(c => c.id !== id));
+  };
 
   // Transaction Actions
-  // A transaction includes: customerId, items: [{menuId, name, price, qty, subtotal}], total, date, status (unpaid, paid)
-  const addTransaction = (transaction) => {
-    setTransactions([{ ...transaction, id: Date.now().toString(), date: new Date().toISOString(), status: 'unpaid' }, ...transactions]);
+  const addTransaction = async (transaction) => {
+    if (!session?.user) return;
+    const payload = {
+      user_id: session.user.id,
+      customer_id: transaction.customerId,
+      total: transaction.total,
+      status: 'unpaid',
+      items: transaction.items
+    };
+    const { data, error } = await supabase.from('transactions').insert([payload]).select();
+    if (data) setTransactions([data[0], ...transactions]);
+    if (error) console.error(error);
   };
   
-  const markAsPaid = (customerId) => {
-    setTransactions(transactions.map(t => 
-      t.customerId === customerId && t.status === 'unpaid' 
-        ? { ...t, status: 'paid', paidDate: new Date().toISOString() } 
-        : t
-    ));
+  const markAsPaid = async (customerId) => {
+    const { data, error } = await supabase.from('transactions')
+      .update({ status: 'paid', paid_date: new Date().toISOString() })
+      .eq('customer_id', customerId)
+      .eq('status', 'unpaid')
+      .select();
+      
+    if (data && !error) {
+      // Update local state based on returned updated data
+      const updatedIds = new Set(data.map(d => d.id));
+      setTransactions(transactions.map(t => updatedIds.has(t.id) ? data.find(d => d.id === t.id) : t));
+    }
   };
 
-  const deleteTransaction = (id) => setTransactions(transactions.filter(t => t.id !== id));
+  const deleteTransaction = async (id) => {
+    await supabase.from('transactions').delete().eq('id', id);
+    setTransactions(transactions.filter(t => t.id !== id));
+  };
 
   return (
     <WarungContext.Provider value={{
+      session, loading, logout,
       menus, addMenu, updateMenu, deleteMenu,
       customers, addCustomer, updateCustomer, deleteCustomer,
       transactions, addTransaction, markAsPaid, deleteTransaction
