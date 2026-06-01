@@ -8,7 +8,7 @@ export const Dashboard = () => {
   const unpaidTransactions = transactions.filter(t => t.status === 'unpaid');
   const totalDebt = unpaidTransactions.reduce((sum, t) => sum + t.total, 0);
   
-  const customersWithDebt = new Set(unpaidTransactions.map(t => t.customerId)).size;
+  const customersWithDebt = new Set(unpaidTransactions.map(t => t.customer_id)).size;
 
   const formatRupiah = (number) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number);
@@ -64,7 +64,7 @@ export const Dashboard = () => {
             </thead>
             <tbody>
               {unpaidTransactions.slice(0, 5).map(t => {
-                const customer = customers.find(c => c.id === t.customerId);
+                const customer = customers.find(c => c.id === t.customer_id);
                 return (
                   <tr key={t.id}>
                     <td>{new Date(t.date).toLocaleDateString('id-ID')}</td>

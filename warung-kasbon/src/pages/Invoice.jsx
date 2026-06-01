@@ -22,7 +22,7 @@ export const Invoice = () => {
     }
   };
 
-  const customerUnpaidTransactions = transactions.filter(t => t.customerId === selectedCustomerId && t.status === 'unpaid');
+  const customerUnpaidTransactions = transactions.filter(t => t.customer_id === selectedCustomerId && t.status === 'unpaid');
   const totalDebt = customerUnpaidTransactions.reduce((sum, t) => sum + t.total, 0);
 
   const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
@@ -80,7 +80,7 @@ export const Invoice = () => {
             >
               <option value="">-- Pilih Pelanggan --</option>
               {customers.map(c => {
-                const debtCount = transactions.filter(t => t.customerId === c.id && t.status === 'unpaid').length;
+                const debtCount = transactions.filter(t => t.customer_id === c.id && t.status === 'unpaid').length;
                 return (
                   <option key={c.id} value={c.id}>
                     {c.name} {debtCount > 0 ? `(${debtCount} transaksi)` : ''}

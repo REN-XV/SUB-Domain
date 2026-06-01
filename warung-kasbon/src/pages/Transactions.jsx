@@ -153,7 +153,12 @@ export const Transactions = () => {
                   <span className="text-sambal" style={{ fontWeight: '700', fontSize: '22px' }}>{formatRupiah(total)}</span>
                 </div>
 
-                <button className="btn btn-primary" style={{ width: '100%', padding: '14px', fontSize: '16px' }} onClick={handleSubmit}>
+                <button 
+                  className="btn btn-primary" 
+                  style={{ width: '100%', padding: '14px', fontSize: '16px', opacity: (!selectedCustomerId || cart.length === 0) ? 0.5 : 1 }} 
+                  onClick={handleSubmit}
+                  disabled={!selectedCustomerId || cart.length === 0}
+                >
                   Simpan Transaksi Kasbon
                 </button>
               </div>
